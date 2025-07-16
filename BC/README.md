@@ -41,11 +41,14 @@ This project wraps the scraper into a Stagehand-compatible module using Node.js.
 
 ## Reproduction Instructions
 
-   
-   Run:
+  First install all dependencies:
+  ```bash
+   cd \take-home && npm install
+   ```
+   Then:
 
    ```bash
-   cd \take-home\src\scripts && node run_stagehand.js "<base_url>"
+   cd \src\scripts && node run_stagehand.js "<base_url>"
    ```
 
 
