@@ -132,13 +132,13 @@ Supabase is used to persist data with the following schema:
 5. The frontend then renders a table of the resulting query
 
 ## How to run
-1. Create a .env.local file in take-home with the following contents:
+1. Create a .env.local file in `take-home` with the following contents:
 ```env
 SUPABASE_URL=https://bpfvweovqyvylazoddly.supabase.co
 SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJwZnZ3ZW92cXl2eWxhem9kZGx5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI2NDEzMDIsImV4cCI6MjA2ODIxNzMwMn0.snR1ibPAeBLJo6XSVhBL8yregAsl8l4DpsqjJVqLvkk
 ```
 
-2. Run the app by running 
+2. Make sure you are in `\take-home` and then run the app by: 
 ```bash
    npm run dev
    ```
