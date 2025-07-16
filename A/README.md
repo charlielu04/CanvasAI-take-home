@@ -44,7 +44,10 @@ This project uses Python and [Playwright](https://playwright.dev/python/) to pro
    ```bash
    python scraper.py <base_url>
    ```
-   Example: python scraper.py "https://www.bbb.org/search?filter_category=60548-100&filter_category=60142-000&filter_ratings=A&find_country=USA&find_text=Medical+Billing&page="
+   Example: 
+   ```bash
+   python scraper.py "https://www.bbb.org/search?filter_category=60548-100&filter_category=60142-000&filter_ratings=A&find_country=USA&find_text=Medical+Billing&page="
+   ```
    (Notice how there is no page specified)
 5. The output will be saved as `medical_billing_companies.csv`.
 
