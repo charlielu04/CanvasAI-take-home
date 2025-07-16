@@ -113,14 +113,6 @@ def run(playwright: Playwright, base_url: str):
                 )
                 if "is BBB Accredited" in text:
                     accreditation_status = True
-            elif p.locator("h3.bds-h5.bpr-not-accredited-heading").count() > 0:
-                text = (
-                    p.locator("h3.bds-h5.bpr-not-accredited-heading")
-                    .first.inner_text()
-                    .strip()
-                )
-                if "is NOT a BBB Accredited Business" in text:
-                    accreditation_status = False
 
             # print(f"{name} | {full_url} | Phone: {phone} | Address: {address} | Principal Contact: {principal_contact} | Accredited: {accreditation_status}")
             if (name, phone) in seen:
