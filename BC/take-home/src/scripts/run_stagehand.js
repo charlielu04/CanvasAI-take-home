@@ -1,4 +1,6 @@
-import { scrape }  from "../stagehand/module.js";
+import 'dotenv/config';
+import { scrape }  from "../stagehand/scrape.js";
+
 
 const url = process.argv[2];
 

@@ -15,27 +15,21 @@ This prompt represents the base search URL from the BBB site. The Stagehand modu
 
 ## Method Overview
 
-This project wraps the scraper into a Stagehand-compatible module using Node.js.
+This script leverages Stagehand and Browserbase to automate the extraction of business information from Better Business Bureau (BBB) search result pages.
 
-- The file `module.js` is located in `src/stagehand/` and serves as the entrypoint for Stagehand.
-- When invoked, the module:
-  - Accepts a `url` parameter.
-  - Runs the Python scraper (`scraper.py`) via `child_process.exec`.
-  - The Python scraper:
-    - Loops over pages 1–15 of the BBB search.
-    - Extracts fields from individual business profiles:
-      - Business name  
-      - Phone number (formatted as `+1XXXXXXXXXX`)  
-      - Street address  
-      - Principal contact(s)  
-      - Accreditation status  
-      - Business URL
-    - Deduplicates entries by business name + phone number.
-    - Saves results to `medical_billing_companies.csv`.
-    - Also prints valid JSON directly to stdout for use by Stagehand.
-  - The Node module:
-    - Parses this JSON and returns it as `json`.
-    - Also reads and returns the CSV output as a string.
+The scraper:
+
+- Visits multiple pages of BBB search results (defaulting to pages 1-15).
+- Extracts detailed information for each listed business by visiting their respective BBB profile pages.
+- Collects the following details:
+  - **Business Name**
+  - **Address**
+  - **Phone Number**
+  - **Primary Contact** (if available)
+  - **BBB Accreditation Status**
+  - **Profile URL**
+- Filters out duplicates based on **Business Name** and **Phone Number**.
+- Exports the collected data to a CSV file (`medical_billing_companies.csv`).
 
 ---
 

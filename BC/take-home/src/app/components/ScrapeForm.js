@@ -26,7 +26,7 @@ export default function ScrapeForm() {
 
       if (!res.ok) throw new Error(data.error || "Scraper failed");
 
-      setResults(data.output); // JSON array
+      setResults(data.output);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -66,11 +66,11 @@ export default function ScrapeForm() {
           <tbody>
             {results.map((c, idx) => (
               <tr key={idx}>
-                <td>{c.name}</td>
+                <td>{c.businessName}</td>
                 <td>{c.phone}</td>
-                <td>{c.principal_contact}</td>
+                <td>{c.primaryContact}</td>
                 <td>{c.address}</td>
-                <td>{c.accredited ? "✅" : "❌"}</td>
+                <td>{c.accreditationStatus}</td>
                 <td>
                   <a href={c.url} target="_blank" rel="noopener noreferrer">
                     Visit

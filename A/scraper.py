@@ -51,7 +51,7 @@ def run(playwright: Playwright, base_url: str):
     seen = set()
     results = []
 
-    for i in range(1, 16):
+    for i in range(1, 2):
         start_url = f"{base_url}{i}"
 
         chrome = playwright.chromium

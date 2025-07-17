@@ -1,5 +1,14 @@
-import { scrape } from "../../../stagehand/module";
-import { createClient } from "@supabase/supabase-js";
+import { NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
+import { exec } from 'child_process';
+import { promisify } from 'util';
+import path from 'path';
+import fs from 'fs';
+import Papa from 'papaparse';
+
+export const runtime = 'nodejs';
+
+const execAsync = promisify(exec);
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -9,32 +18,49 @@ const supabase = createClient(
 export async function POST(request) {
   try {
     const { url } = await request.json();
-    console.log("Inserting URL:", url);
-
     if (!url) {
-      return new Response(JSON.stringify({ error: "Missing URL" }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      });
+      return NextResponse.json({ error: 'Missing URL' }, { status: 400 });
     }
 
-    const search_url = url;
+    const runner = path.resolve(
+      process.cwd(),
+      'src',
+      'scripts',
+      'run_stagehand.js'
+    );
+    const cmd = `node "${runner}" "${url}"`;
+    console.log('Running scraper:', cmd);
 
-    // Run Stagehand scraper
-    const rawScrapeResult = await scrape.run({ url });
+    const { stdout, stderr } = await execAsync(cmd, { timeout: 300000 });
+    if (stderr) console.warn('Scraper stderr:', stderr);
 
-    if (!rawScrapeResult || !rawScrapeResult.json) {
-      throw new Error("No JSON results returned from scrape module");
+    const csvPath = path.resolve(process.cwd(), 'medical_billing_companies.csv');
+    const csvContent = fs.readFileSync(csvPath, 'utf-8');
+
+    const parsed = Papa.parse(csvContent, {
+      header: true,
+      skipEmptyLines: true
+    });
+
+    if (parsed.errors.length) {
+      console.error('CSV parse errors:', parsed.errors);
+      return NextResponse.json({ error: 'Failed to parse CSV' }, { status: 500 });
     }
 
-    const results = rawScrapeResult.json;
+    const results = parsed.data.map((row) => ({
+      businessName: row['Business Name'] || '',
+      address: row['Address'] || '',
+      phone: row['Phone Number'] || '',
+      primaryContact: row['Primary Contact'] || '',
+      accreditationStatus: row['BBB Accreditation Status'] || '',
+      url: row['Profile URL'] || '',
+    }));
 
-    // Look up or insert search_url row
     let searchUrlRow;
     const { data: existing } = await supabase
       .from("search_urls")
       .select("*")
-      .eq("url", search_url)
+      .eq("url", url)
       .single();
 
     if (existing) {
@@ -42,7 +68,7 @@ export async function POST(request) {
     } else {
       const { data, error: insertError } = await supabase
         .from("search_urls")
-        .insert({ url: search_url })
+        .insert({ url })
         .select()
         .single();
 
@@ -54,16 +80,13 @@ export async function POST(request) {
       searchUrlRow = data;
     }
 
-    
-
-    // Insert results into Supabase
     const search_url_id = searchUrlRow.id;
     const enrichedResults = results.map((r) => ({ ...r, search_url_id }));
 
     const { error: insertResultsError } = await supabase
       .from("results")
       .upsert(enrichedResults, {
-        onConflict: ["name", "phone", "search_url_id"],
+        onConflict: ["businessName", "phone", "search_url_id"],
       });
 
     if (insertResultsError) {
@@ -71,7 +94,6 @@ export async function POST(request) {
       throw new Error("Failed to insert results");
     }
 
-    // Fetch all results for this search_url
     const { data: finalResults, error: fetchError } = await supabase
       .from("results")
       .select("*")
@@ -81,16 +103,10 @@ export async function POST(request) {
       console.error("SUPABASE RESULTS FETCH ERROR:", fetchError);
       throw new Error("Failed to fetch results");
     }
-    // Return
-    return new Response(JSON.stringify({ output: finalResults }), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-    });
+
+    return NextResponse.json({ output: finalResults }, { status: 200 });
   } catch (error) {
     console.error("SCRAPE API ERROR:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
